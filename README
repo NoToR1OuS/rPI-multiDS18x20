@@ -1,23 +1,68 @@
 This code supports the page at: 
 http://webshed.org/wiki/RaspberryPI_Multiple_DS1820
 
-The new version works with multiple sensors & doesn't forget how they are ordered on the bus. There was a "feature" in the old version of the code where upon reset, the sensors might get detected in a different order and data written to the wrong slots in the RRDtool database.
+The new version works with multiple sensors & doesn't forget how they are ordered on the bus. 
+There was a "feature" in the old version of the code where upon reset, the sensors might get 
+detected in a different order and data written to the wrong slots in the RRDtool database.
 
-There is an example sensors.conf & database in the /example directory. This is for a 6 sensor system. The graph plotting script can be used as a base to create your own, if you come up eith a good way to programatically generate the graph plotting script, please share it with me!
+==Short HOWTO==
 
-==Very short HOWTO==
+I use vi for all of my text manipulations because I can't stand nano so unless you know well enough to translate
+vi commands to nano I recommend running the following command and selecting the option that is using some form of vi or vim
 
-Install the 1-wire libraries on your rPI
-Wire up your sensors according to the diagram here - just connect multiple sensors in parallel (http://webshed.org/wiki/File:Fritzing_rPI_DS1820.png)
+sudo update-alternatives --config editor
 
-run detect.pl to find sesnors in the 1-wire bus
-edit sensors.conf to give them nice names (if you wish) and any offset / calibration values you need
-(format is NAME , OFFSET , 1-WIRE ID)
+For the modifications I have made you will need to install RRDsimple perl module and some extra perl libs
 
-run makedb.pl to create the RRDTOOL database
+apt-get install librrds-perl
+perl -MCPAN -e 'install RRD::Simple'
 
-call gettemp.pl from a cron job or some otherway to periodically read the sensors and update the database
+After you have these modules installed you should not have any problems in running the modified perl scripts.
 
-use the examples/graph.sh file as a base for your own graphing needs.
+Run the detect.pl file, after you run this you will have a sensors.conf file within the directory you executed it.  
+  I have named the sensors based on the sensors I am monitoring labeled for different areas of a house.  
+  If you run this script after you have made modifications to your sensors.conf file it will blow everything away.
+  
+  What my sensors.conf looks like
+    root@raspberrypi:/rrdtool# cat sensors.conf 
+    floor,0.0,28-011572d07eff
+    wall,0.0,28-0115726b91ff
+    ceiling,0.0,28-0115640349ff
+    attic,0.0,28-0215725affff
+    ambient,0.0,28-011572cdefff
 
---David G7UVW
+After that I have a couple of modifications for monitoring the temperature relative to outside temp, there are two 
+  different RRD files, one is for outdoor temp the other is for the sensor data.
+  
+To create the database for the outside temps run makedbouttemp.sh, this will create a file called outtemp.rrd.
+Next create the database for the sensors (if you have changed the IDs you will need to change them in this shell
+script or you will get errors).  run makedbsensors.sh and this will create sensors.rrd.
+
+Now that we have both RRD files we can go ahead with starting to graph the temperatures.
+
+The first one pieces were borrowed from this walkthrough for monitoring a single sensor:
+  http://blog.turningdigital.com/2012/09/raspberry-pi-ds18b20-temperature-sensor-rrdtool/
+  
+Lets start graphing outdoor temps
+
+  First you will need to go here: http://weather.rap.ucar.edu/surface/stations.txt and get the ICAO code 
+  for the area you are in.
+  
+  After you have the code for your location you need to edit the outtemp.pl file and modify the 5th line:
+  my $metar_url = 'http://weather.noaa.gov/pub/data/observations/metar/stations/KSTL.TXT';
+  
+  Now we want this job to run every 5 minutes to update our RRD so we will add a cronjob
+    
+    Enter command:
+    crontab -e
+    
+    Add this line to the bottom of the file:
+    */5 * * * * /rrdtool/outtemp.pl
+  
+    exit out of the editor :wq
+    
+    You can see if your changes took by running crontab -l
+    
+  
+
+--Mike NoToR1OuS
