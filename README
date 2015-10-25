@@ -1,14 +1,11 @@
 This code supports the page at: 
 http://webshed.org/wiki/RaspberryPI_Multiple_DS1820
 
-The new version works with multiple sensors & doesn't forget how they are ordered on the bus. 
-There was a "feature" in the old version of the code where upon reset, the sensors might get 
-detected in a different order and data written to the wrong slots in the RRDtool database.
+The new version works with multiple sensors & doesn't forget how they are ordered on the bus. There was a "feature" in the old version of the code where upon reset, the sensors might get detected in a different order and data written to the wrong slots in the RRDtool database.
 
 ==Short HOWTO==
 
-I use vi for all of my text manipulations because I can't stand nano so unless you know well enough to translate
-vi commands to nano I recommend running the following command and selecting the option that is using some form of vi or vim
+I use vi for all of my text manipulations because I can't stand nano so unless you know well enough to translate vi commands to nano I recommend running the following command and selecting the option that is using some form of vi or vim
 
 sudo update-alternatives --config editor
 
@@ -21,10 +18,7 @@ perl -MCPAN -e 'install RRD::Simple'
 
 After you have these modules installed you should not have any problems in running the modified perl scripts.
 
-Run the detect.pl file, after you run this you will have a sensors.conf file within the directory you executed it.  
-  I have named the sensors based on the sensors I am monitoring labeled for different areas of a house.  
-  If you run this script after you have made modifications to your sensors.conf file it will blow everything away.
-  
+Run the detect.pl file, after you run this you will have a sensors.conf file within the directory you executed it.  I have named the sensors based on the sensors I am monitoring labeled for different areas of a house.    If you run this script after you have made modifications to your sensors.conf file it will blow everything away.
   What my sensors.conf looks like
     root@raspberrypi:/rrdtool# cat sensors.conf 
     floor,0.0,28-011572d07eff
@@ -33,12 +27,9 @@ Run the detect.pl file, after you run this you will have a sensors.conf file wit
     attic,0.0,28-0215725affff
     ambient,0.0,28-011572cdefff
 
-After that I have a couple of modifications for monitoring the temperature relative to outside temp, there are two 
-  different RRD files, one is for outdoor temp the other is for the sensor data.
+After that I have a couple of modifications for monitoring the temperature relative to outside temp, there are two different RRD files, one is for outdoor temp the other is for the sensor data.
   
-To create the database for the outside temps run makedbouttemp.sh, this will create a file called outtemp.rrd.
-Next create the database for the sensors (if you have changed the IDs you will need to change them in this shell
-script or you will get errors).  run makedbsensors.sh and this will create sensors.rrd.
+To create the database for the outside temps run makedbouttemp.sh, this will create a file called outtemp.rrd.  Next create the database for the sensors (if you have changed the IDs you will need to change them in this shell script or you will get errors).  run makedbsensors.sh and this will create sensors.rrd.
 
 Now that we have both RRD files we can go ahead with starting to graph the temperatures.
 
@@ -65,19 +56,15 @@ Lets start graphing outdoor temps
     
     You can see if your changes took by running crontab -l
     
-  And here is the final bit to get the RRD graphs for the temperature sensors going, There are many ways to make this
-    run on boot, the other fork to this has added functionality where as soon as you run the gettemp.pl script it will
-    loop forever. Just for testing, while you are in the directory with gettemp.pl run the following
+  And here is the final bit to get the RRD graphs for the temperature sensors going, There are many ways to make this run on boot, the other fork to this has added functionality where as soon as you run the gettemp.pl script it will loop forever. Just for testing, while you are in the directory with gettemp.pl run the following
     
     ./gettemp.pl &
     
   That will execute the perl script and throw it in the background.  
   
-  Now our files should be updating, I have the gettemp.pl script set on an interval of every 60 seconds and the outtemp.pl 
-    set to every 5 minutes.
+  Now our files should be updating, I have the gettemp.pl script set on an interval of every 60 seconds and the outtemp.pl set to every 5 minutes.
     
-  To make sure your .rrd graphs are being populated run the command date to see the current date then perform an ls -la
-    in the directory with your .rrd files to make sure their timestamp is updating.
+  To make sure your .rrd graphs are being populated run the command date to see the current date then perform an ls -la  in the directory with your .rrd files to make sure their timestamp is updating.
     
   After you have verified everything is successfully writing to the database you can set the graph.sh to run every 5
     minutes, same procedure using crontab
@@ -90,7 +77,6 @@ Lets start graphing outdoor temps
       
     This will write new .png files every 5 minutes.
     
-  I have some additional files and libraries that allow me to dump this to a web page, temperature.php and an interactive 
-    javascript graph page (borrowed from here: http://javascriptrrd.sourceforge.net/) 
+  I have some additional files and libraries that allow me to dump this to a web page, temperature.php and an interactive javascript graph page (borrowed from here: http://javascriptrrd.sourceforge.net/) 
 
 --Mike NoToR1OuS
